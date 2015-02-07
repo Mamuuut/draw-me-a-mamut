@@ -1,12 +1,11 @@
 {
-  "name": "draw-me-amamut",
+  "name": "draw-me-a-mamut",
   "version": "0.0.0",
   "dependencies": {
     "angular": ">=1.2.*",
     "json3": "~3.3.1",
     "es5-shim": "~3.0.1",
     "jquery": "~1.11.0",
-    "bootstrap-sass-official": "~3.1.1",
     "bootstrap": "~3.1.1",
     "angular-resource": ">=1.2.*",
     "angular-cookies": ">=1.2.*",
@@ -20,5 +19,8 @@
   "devDependencies": {
     "angular-mocks": ">=1.2.*",
     "angular-scenario": ">=1.2.*"
+  },
+  "resolutions": {
+    "angular": "1.3.0"
   }
 }
