@@ -1,116 +1,176 @@
 'use strict';
 
 angular.module('drawMeAMamutApp')
-.directive('drawing', function () {
+  .directive('drawing', function ($window)
+  {
 
-  return {
-    restrict: 'A',
-    link: function (scope, element, attrs) {
-      var bDown = false;
-      var ctx = element[0].getContext('2d');
+    return {
+      restrict : 'A',
+      templateUrl : 'app/drawing/drawing.html',
+      link : function (scope, element, attrs)
+      {
 
-      ctx.strokeStyle = 'rgba(127,0,255,0.5)';
-      ctx.lineWidth = 4;
-      ctx.lineCap = 'round';
+        scope.bDown = false;
 
-      var aoPath = [];
-      var aoPos = [];
+        scope.aoPath = [];
 
-      /**
-       * Draw the path on the canvas
-       * @param  {Object} event - mouse event
-       * @return {void}
-       */
-      var drawPath = function(event) {
-        var canvas = event.target;
-        var ctx = canvas.getContext('2d');
-        ctx.clearRect ( 0 , 0 , canvas.width, canvas.height );
+        var elBack = element.find('.canvas-back');
+        var elFront = element.find('.canvas-front');
 
-        for (var i = 0; i < aoPath.length; i++) {
+        /**
+         * Resize the Element to its parent size
+         * @param  {Element} element - element to resize
+         * @return {void}
+         */
 
-          var aoPos = aoPath[i];
+        var onResize = function()
+        {
+          element.find('canvas').attr({
+            'width' : element.parent().innerWidth(),
+            'height' : element.parent().innerHeight()
+          });
 
+          for (var iPath = 1, iLength = scope.aoPath.length; iPath < iLength; iPath++) {
+            var oPath = scope.aoPath[iPath];
+            drawPath(elBack, oPath);
+          }
+        };
+
+        /**
+         * Clear the canvas rect
+         * @param  {jqueryElement} elCanvas - canvas jQuery Element
+         * @return {void}
+         */
+
+        var clearCanvas = function(elCanvas)
+        {
+          var ctx = elCanvas.get(0).getContext('2d');
+          ctx.clearRect(0, 0, elCanvas.get(0).width, elCanvas.get(0).height);
+        };
+
+        /**
+         * Draw the path on the canvas
+         * @param  {Object} event - mouse event
+         * @return {void}
+         */
+
+        var drawPath = function(elCanvas, oPath)
+        {
+          var ctx = elCanvas.get(0).getContext('2d');
+
+          ctx.strokeStyle = oPath.sColor;
+          ctx.lineWidth = oPath.iLineWidth;
+          ctx.lineCap = 'round';
+
+          var oStartPos = oPath.aoPos[0];
           ctx.beginPath();
-          ctx.moveTo(aoPos[0].x - 0.01, aoPos[0].y - 0.01);
+          ctx.moveTo(oStartPos.x - 0.01, oStartPos.y - 0.01);
 
-          for (var j = 1; j < aoPos.length; j++) {
-            ctx.lineTo(aoPos[j].x, aoPos[j].y);
-          };
+          for (var iPos = 1, iLength = oPath.aoPos.length; iPos < iLength; iPos++) {
+            ctx.lineTo(oPath.aoPos[iPos].x, oPath.aoPos[iPos].y);
+          }
 
           ctx.stroke();
           ctx.closePath();
         };
-      };
 
-      /**
-       * Begin the path
-       * @param  {Object} event - mouse event
-       * @return {void}
-       */
-      var beginPath = function(event) {
-        bDown = true;
-        aoPos = [];
-        aoPath.push(aoPos);
-        addPos(event);
-      };
+        /**
+         * Begin the path
+         * @param  {Object} event - mouse event
+         * @return {void}
+         */
 
-      /**
-       * End the path
-       * @param  {Object} event - mouse event
-       * @return {void}
-       */
-      var endPath = function(event) {
-        if (bDown) {
+        var beginPath = function(event)
+        {
+          scope.bDown = true;
+          scope.oPath = {
+            'aoPos' : [],
+            'sColor' : scope.sColor,
+            'iLineWidth' : scope.iLineWidth
+          };
+          scope.aoPath.push(scope.oPath);
           addPos(event);
-          drawPath(event);
-          bDown = false;
-        }
-      };
+        };
 
-      /**
-       * Add the mouse position to the path
-       * @param  {Object} event - mouse event
-       * @return {void}
-       */
-      var addPos = function(event) {
-        aoPos.push({
-          x: event.offsetX,
-          y: event.offsetY
+        /**
+         * End the path
+         * @param  {Object} event - mouse event
+         * @return {void}
+         */
+
+        var endPath = function(event)
+        {
+          if (scope.bDown) {
+            addPos(event);
+
+            clearCanvas(elFront);
+            drawPath(elBack, scope.oPath);
+
+            scope.bDown = false;
+          }
+        };
+
+        /**
+         * Add the mouse position to the path
+         * @param  {Object} event - mouse event
+         * @return {void}
+         */
+
+        var addPos = function(event)
+        {
+          scope.oPath.aoPos.push({
+            'x' : event.offsetX,
+            'y' : event.offsetY
+          });
+
+          clearCanvas(elFront);
+          drawPath(elFront, scope.oPath);
+        };
+
+        /**
+         * Event listeners
+         */
+
+        element.on('mousedown', function(event)
+        {
+          beginPath(event);
         });
 
-        drawPath(event);
-      };
+        element.on('mouseup', function(event)
+        {
+          if (scope.bDown) {
+            endPath(event);
+          }
+        });
 
-      /**
-       * Event listeners
-       */
-      element.on('mousedown', function(event) {
-        beginPath(event);
-      });
+        element.on('mouseleave', function(event)
+        {
+          if (scope.bDown) {
+            endPath(event);
+          }
+        });
 
-      element.on('mouseup', function(event) {
-        if (bDown) {
-          endPath(event);
-        }
-      });
+        element.on('mouseenter', function(event)
+        {
+          if (event.which) {
+            beginPath(event);
+          }
+        });
 
-      element.on('mouseleave', function(event) {
-        if (bDown) {
-          endPath(event);
-        }
-      });
+        element.on('mousemove', function(event)
+        {
+          if (scope.bDown) {
+            addPos(event);
+          }
+        });
 
-      element.on('mouseenter', function(event) {
-        if (event.which) {
-          beginPath(event);
-        }
-      });
+        // Resize
+        onResize(element);
 
-      element.on('mousemove', function(event) {
-        if (bDown) {
-          addPos(event);
-        }
-      });
-    }
-  };
-});
+        angular.element($window).on('resize', function()
+        {
+            onResize();
+        });
+      }
+    };
+  });
