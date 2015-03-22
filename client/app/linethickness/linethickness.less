@@ -8,17 +8,22 @@
         margin: 0 4px;
         cursor: pointer;
         border-radius: 50%;
-        border: 4px #fff solid;
+        background-color: #000;
+        line-height: 30px;
+        font-weight: bold;
+        color: #fff;
+        text-align: center;
+        .scale(.7);
 
-        &.selected {
-            border: 4px #ddd solid;
+        &:hover {
+          .scale(1);
         }
 
-        .line-width-dot {
-            background-color : #000;
-            border-radius: 50%;
-            width: 100%;
-            height: 100%;
+        &.selected {
+          .scale(1.2);
+        }
+
+        span {
         }
     }
 }

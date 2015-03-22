@@ -16,6 +16,12 @@ angular.module('drawMeAMamutApp', [
     $httpProvider.interceptors.push('authInterceptor');
   })
 
+  .filter("reverse", function(){
+    return function(items){
+        return items.slice().reverse(); // Create a copy of the array and reverse the order of the items
+    };
+  })
+
   .factory('authInterceptor', function ($rootScope, $q, $cookieStore, $location) {
     return {
       // Add authorization token to headers

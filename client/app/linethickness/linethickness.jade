@@ -1,3 +1,6 @@
 div.line-width-picker
-    div.line-width(ng-repeat='iWidth in aiLineWidth', data-width="{{iWidth}}")
-        div.line-width-dot(dotstyle)
+    div.line-width(
+      ng-repeat='iWidth in aiLineWidth',
+      ng-class="{'selected':iWidth === iDrawLineWidth}",
+      data-width="{{iWidth}}")
+        span {{iWidth}}

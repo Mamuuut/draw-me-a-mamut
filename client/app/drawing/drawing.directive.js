@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('drawMeAMamutApp')
-  .directive('drawing', function ($window)
+  .directive('drawing', function ($window, $rootScope, $q)
   {
 
     return {
@@ -9,11 +9,6 @@ angular.module('drawMeAMamutApp')
       templateUrl : 'app/drawing/drawing.html',
       link : function (scope, element, attrs)
       {
-
-        scope.bDown = false;
-
-        scope.aoPath = [];
-
         var elBack = element.find('.canvas-back');
         var elFront = element.find('.canvas-front');
 
@@ -26,8 +21,8 @@ angular.module('drawMeAMamutApp')
         var onResize = function()
         {
           element.find('canvas').attr({
-            'width' : element.parent().innerWidth(),
-            'height' : element.parent().innerHeight()
+            'width' : element.innerWidth(),
+            'height' : element.innerHeight()
           });
 
           for (var iPath = 1, iLength = scope.aoPath.length; iPath < iLength; iPath++) {
@@ -54,7 +49,7 @@ angular.module('drawMeAMamutApp')
          * @return {void}
          */
 
-        var drawPath = function(elCanvas, oPath)
+        var drawPath = function(elCanvas, oPath, iMaxPos)
         {
           var ctx = elCanvas.get(0).getContext('2d');
 
@@ -66,7 +61,7 @@ angular.module('drawMeAMamutApp')
           ctx.beginPath();
           ctx.moveTo(oStartPos.x - 0.01, oStartPos.y - 0.01);
 
-          for (var iPos = 1, iLength = oPath.aoPos.length; iPos < iLength; iPos++) {
+          for (var iPos = 1, iLength = iMaxPos || oPath.aoPos.length; iPos < iLength; iPos++) {
             ctx.lineTo(oPath.aoPos[iPos].x, oPath.aoPos[iPos].y);
           }
 
@@ -85,8 +80,8 @@ angular.module('drawMeAMamutApp')
           scope.bDown = true;
           scope.oPath = {
             'aoPos' : [],
-            'sColor' : scope.sColor,
-            'iLineWidth' : scope.iLineWidth
+            'sColor' : scope.sDrawColor,
+            'iLineWidth' : scope.iDrawLineWidth
           };
           scope.aoPath.push(scope.oPath);
           addPos(event);
@@ -107,6 +102,7 @@ angular.module('drawMeAMamutApp')
             drawPath(elBack, scope.oPath);
 
             scope.bDown = false;
+            scope.$apply();
           }
         };
 
@@ -170,6 +166,27 @@ angular.module('drawMeAMamutApp')
         angular.element($window).on('resize', function()
         {
             onResize();
+        });
+
+        $rootScope.$on('draw-repeat', function()
+        {
+          clearCanvas(elBack);
+          var iPath = 0;
+          var iMaxPos = 1;
+          var iterate = function() {
+            if (scope.aoPath[iPath] !== undefined) {
+              drawPath(elBack, scope.aoPath[iPath], iMaxPos);
+              if (iMaxPos >= scope.aoPath[iPath].aoPos.length - 1) {
+                iPath++;
+                iMaxPos = 1;
+              }
+              else {
+                iMaxPos = Math.min(iMaxPos + 2, scope.aoPath[iPath].aoPos.length - 1);
+              }
+              setTimeout(iterate, 10);
+            }
+          }
+          iterate();
         });
       }
     };
