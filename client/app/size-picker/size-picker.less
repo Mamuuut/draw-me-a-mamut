@@ -1,0 +1,45 @@
+stroke-picker {
+    display: block;
+    
+    .stroke-picker {
+        position: relative;
+
+        .stroke {
+            display: block;
+            overflow: hidden;
+            width: 30px;
+            height: 30px;
+            margin: 0 4px;
+            padding: 0;
+            border-radius: 50%;
+            line-height: 26px;
+            font-weight: bold;
+            text-align: center;
+            color: #fff;
+            background-color: #000;
+            border: 2px #fff solid;
+        }
+
+        .dropdown-menu {
+            .stroke {
+                margin: 4px;
+                display: inline-block;
+                cursor: pointer;
+                color: #333;
+                background-color: #fff;
+                border: none;
+                line-height: 30px;
+
+                &:hover {
+                    color: #333;
+                    background-color: #ccc;
+                }
+
+                &.selected {
+                    color: #fff;
+                    background-color: #000;
+                }
+            }
+        }
+    }
+}

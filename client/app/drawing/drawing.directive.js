@@ -9,6 +9,8 @@ angular.module('drawMeAMamutApp')
       templateUrl : 'app/drawing/drawing.html',
       link : function (scope, element, attrs)
       {
+        scope.iNbPos = 0;
+
         var elBack = element.find('.canvas-back');
         var elFront = element.find('.canvas-front');
 
@@ -54,7 +56,7 @@ angular.module('drawMeAMamutApp')
           var ctx = elCanvas.get(0).getContext('2d');
 
           ctx.strokeStyle = oPath.sColor;
-          ctx.lineWidth = oPath.iLineWidth;
+          ctx.lineWidth = oPath.iStroke;
           ctx.lineCap = 'round';
 
           var oStartPos = oPath.aoPos[0];
@@ -77,11 +79,13 @@ angular.module('drawMeAMamutApp')
 
         var beginPath = function(event)
         {
+          scope.aoPath.splice(scope.iNbPos);
           scope.bDown = true;
           scope.oPath = {
             'aoPos' : [],
-            'sColor' : scope.sDrawColor,
-            'iLineWidth' : scope.iDrawLineWidth
+            'fAnimPercent' : 1,
+            'sColor' : scope.sGetRgba(),
+            'iStroke' : scope.iStroke
           };
           scope.aoPath.push(scope.oPath);
           addPos(event);
@@ -101,8 +105,9 @@ angular.module('drawMeAMamutApp')
             clearCanvas(elFront);
             drawPath(elBack, scope.oPath);
 
+            scope.iNbPos = scope.aoPath.length;
+
             scope.bDown = false;
-            scope.$apply();
           }
         };
 
@@ -126,39 +131,31 @@ angular.module('drawMeAMamutApp')
         /**
          * Event listeners
          */
-
-        element.on('mousedown', function(event)
+        scope.onMouseDown = function(event)
         {
           beginPath(event);
-        });
+        };
 
-        element.on('mouseup', function(event)
+        scope.onMouseUp = function($event)
         {
           if (scope.bDown) {
-            endPath(event);
+            endPath($event);
           }
-        });
+        };
 
-        element.on('mouseleave', function(event)
+        scope.onMouseEnter = function($event)
+        {
+          if ($event.which) {
+            beginPath($event);
+          }
+        };
+
+        scope.onMouseMove = function($event)
         {
           if (scope.bDown) {
-            endPath(event);
+            addPos($event);
           }
-        });
-
-        element.on('mouseenter', function(event)
-        {
-          if (event.which) {
-            beginPath(event);
-          }
-        });
-
-        element.on('mousemove', function(event)
-        {
-          if (scope.bDown) {
-            addPos(event);
-          }
-        });
+        };
 
         // Resize
         onResize(element);
@@ -168,25 +165,62 @@ angular.module('drawMeAMamutApp')
             onResize();
         });
 
+        $rootScope.$on('draw-clear', function()
+        {
+          scope.aoPath = [];
+          clearCanvas(elBack);
+        });
+
+        $rootScope.$on('draw-to-path', function(event, iToPath)
+        {
+          clearCanvas(elBack);
+
+          var iPath = 0;
+          for (var iLength = scope.aoPath.length; iPath < iLength; iPath++) {
+            scope.aoPath[iPath].fAnimPercent = 0;
+          }
+
+          iPath = 0;
+          for (var iPath; iPath < iToPath + 1; iPath ++) {
+            scope.aoPath[iPath].fAnimPercent = 1;
+            drawPath(elBack, scope.aoPath[iPath]);
+          }
+          
+          scope.iNbPos = iToPath + 1;
+        });
+
         $rootScope.$on('draw-repeat', function()
         {
           clearCanvas(elBack);
+
+          var iTotalPos = 0;
           var iPath = 0;
+          for (var iLength = scope.aoPath.length; iPath < iLength; iPath++) {
+            scope.aoPath[iPath].fAnimPercent = 0;
+            iTotalPos += scope.aoPath[iPath].aoPos.length;
+          }
+
+          var iStep = Math.ceil(iTotalPos / 300);
+
           var iMaxPos = 1;
+          iPath = 0;
           var iterate = function() {
             if (scope.aoPath[iPath] !== undefined) {
               drawPath(elBack, scope.aoPath[iPath], iMaxPos);
-              if (iMaxPos >= scope.aoPath[iPath].aoPos.length - 1) {
+              var iNbPos = scope.aoPath[iPath].aoPos.length;
+              scope.aoPath[iPath].fAnimPercent = iMaxPos / (iNbPos - 1);
+              if (iMaxPos >= iNbPos - 1) {
                 iPath++;
                 iMaxPos = 1;
               }
               else {
-                iMaxPos = Math.min(iMaxPos + 2, scope.aoPath[iPath].aoPos.length - 1);
+                iMaxPos = Math.min(iMaxPos + iStep, scope.aoPath[iPath].aoPos.length - 1);
               }
               setTimeout(iterate, 10);
+              scope.$apply();
             }
           }
-          iterate();
+          setTimeout(iterate, 10);
         });
       }
     };

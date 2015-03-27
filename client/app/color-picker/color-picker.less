@@ -1,0 +1,32 @@
+color-picker {
+    display: block;
+    
+    .color-picker {
+        position: relative;
+
+        .color {
+            display: block;
+            overflow: hidden;
+            width: 30px;
+            height: 30px;
+            border: 2px #fff solid;
+            margin: 0 4px;
+            border-radius: 4px;
+        }
+
+        .dropdown-menu {
+            width: 390px;
+
+            .color {
+                display: inline-block;
+                cursor: pointer;
+                .scale(.7);
+
+                &:hover,
+                &.selected {
+                  .scale(1);
+                }
+            }
+        }
+    }
+}

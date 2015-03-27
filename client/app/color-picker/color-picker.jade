@@ -1,0 +1,17 @@
+div(
+  class="color-picker"
+  dropdown
+  is-open="status.isopen")
+    button(
+      class="color btn dropdown-toggle"
+      type="button"
+      ng-style='getSelectedColor()'
+    )
+    .dropdown-menu
+      .color(
+        ng-repeat='sColor in asColor'
+        ng-class="{'selected':sColor === sDrawColor}"
+        ng-click="onClick($event)"
+        style='background-color: {{sColor}}'
+        data-color="{{sColor}}"
+      )

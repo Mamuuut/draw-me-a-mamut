@@ -1,6 +1,13 @@
-button(class="btn draw-history-repeat")
+button(class="btn draw-history-clear", ng-click="onClear()")
+  span(class="glyphicon glyphicon-remove")
+button(class="btn draw-history-repeat", ng-click="onRepeat()")
   span(class="glyphicon glyphicon-repeat")
 .draw-history
   draw-history-path(
     ng-repeat='oPath in aoPath|reverse'
+    ng-click="onDrawToPath($event)"
+    data-path="{{aoPath.length - $index - 1}}"
   )
+    .draw-history-color(
+      ng-style="getPathPercent(oPath)"
+    ) {{oPath.iStroke}}

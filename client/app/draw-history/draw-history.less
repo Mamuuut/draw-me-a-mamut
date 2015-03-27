@@ -2,24 +2,27 @@ draw-history {
   position: relative;
   display: block;
   overflow: hidden;
-  padding-left: 38px;
 }
 
-.draw-history-repeat {
-  position: absolute;
-  left: 0;
-  top: 0;
+.draw-history-repeat,
+.draw-history-clear, {
+  position: relative;
   height: 30px;
   line-height: 20px;
   padding: 0;
   width: 30px;
+  margin: 0 4px;
+  display: inline-block;
   text-align: center;
 }
 
 .draw-history {
+  left: 80px;
+  right: 0;
+  top: 0;
   height: 30px;
-  margin: 0 -4px;
-  position: relative;
+  margin: 0;
+  position: absolute;
   white-space: nowrap;
 
   &:after {
@@ -35,6 +38,7 @@ draw-history {
   }
 
   draw-history-path {
+    position: relative;
     display: inline-block;
     width: 30px;
     height: 30px;
@@ -42,5 +46,17 @@ draw-history {
     cursor: pointer;
     border-radius: 4px;
     border: 2px #fff solid;
+    background-image: url('/assets/images/opacity-back.png');
+
+    .draw-history-color {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      text-align: center;
+      line-height: 26px;
+      font-weight: bold;
+    }
   }
 }

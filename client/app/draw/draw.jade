@@ -2,10 +2,9 @@ div(ng-include='"components/navbar/navbar.html"')
 
 .container
   div.draw-header.clearfix
-    colorpicker
-    linethickness
-  #canvas_wrapper(
-      drawing
-    )
+    color-picker(color="sDrawColor")
+    stroke-picker(stroke="iStroke")
+    opacity-picker(opacity="fOpacity")
+  #canvas_wrapper(drawing)
   div.draw-footer.clearfix
     draw-history

@@ -1,10 +1,10 @@
 'use strict';
 
-describe('Directive: linethickness', function () {
+describe('Directive: size-picker', function () {
 
   // load the directive's module and view
   beforeEach(module('drawMeAMamutApp'));
-  beforeEach(module('app/linethickness/linethickness.html'));
+  beforeEach(module('app/size-picker/size-picker.html'));
 
   var element, scope;
 
@@ -13,9 +13,9 @@ describe('Directive: linethickness', function () {
   }));
 
   it('should make hidden element visible', inject(function ($compile) {
-    element = angular.element('<linethickness></linethickness>');
+    element = angular.element('<size-picker></size-picker>');
     element = $compile(element)(scope);
     scope.$apply();
-    expect(element.text()).toBe('this is the linethickness directive');
+    expect(element.text()).toBe('this is the size-picker directive');
   }));
 });

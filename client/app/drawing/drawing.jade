@@ -1,2 +1,8 @@
 canvas.canvas-back
-canvas.canvas-front
+canvas.canvas-front(
+  ng-mousedown="onMouseDown($event)"
+  ng-mouseup="onMouseUp($event)"
+  ng-mouseleave="onMouseUp($event)"
+  ng-mouseenter="onMouseEnter($event)"
+  ng-mousemove="onMouseMove($event)"
+)

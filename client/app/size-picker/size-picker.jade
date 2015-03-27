@@ -1,0 +1,19 @@
+div(
+  class="stroke-picker"
+  dropdown
+  is-open="status.isopen")
+    button(
+      class="stroke btn dropdown-toggle"
+      type="button"
+      ng-style='getSelectedColor()'
+    )
+      span {{iStroke}}
+
+    .dropdown-menu
+      .stroke(
+        ng-repeat='iWidth in aiStrokeWidth'
+        ng-class="{'selected':iWidth === iStroke}",
+        data-stroke="{{iWidth}}"
+        ng-click="onClick($event)"
+      )
+        span {{iWidth}}
