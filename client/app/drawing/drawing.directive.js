@@ -1,15 +1,25 @@
 'use strict';
 
 angular.module('drawMeAMamutApp')
-  .directive('drawing', function ($window, $rootScope, $q)
+  .directive('drawing', function ($window, $rootScope, $q, Draw, DrawPath, DrawCircle, DrawRectangle)
   {
+    var asoService = {
+      'path' : DrawPath,
+      'circle' : DrawCircle,
+      'rectangle' : DrawRectangle
+    }
 
     return {
       restrict : 'A',
       templateUrl : 'app/drawing/drawing.html',
       link : function (scope, element, attrs)
       {
-        scope.iNbPos = 0;
+        scope.iNbStep = 0;
+        var oService;
+
+        scope.$watch('sAction', function(sNewAction) {
+          oService = asoService[sNewAction];
+        });
 
         var elBack = element.find('.canvas-back');
         var elFront = element.find('.canvas-front');
@@ -27,133 +37,41 @@ angular.module('drawMeAMamutApp')
             'height' : element.innerHeight()
           });
 
-          for (var iPath = 1, iLength = scope.aoPath.length; iPath < iLength; iPath++) {
-            var oPath = scope.aoPath[iPath];
-            drawPath(elBack, oPath);
+          for (var iDrawStep = 1, iLength = scope.aoDrawStep.length; iDrawStep < iLength; iDrawStep++) {
+            var oDrawStep = scope.aoDrawStep[iDrawStep];
+            DrawPath.draw(elBack, oDrawStep);
           }
         };
 
         /**
-         * Clear the canvas rect
-         * @param  {jqueryElement} elCanvas - canvas jQuery Element
+         * Draw the nb iteration on the canvas
+         * @param  {jQueryElement} elCanvas
+         * @param  {array_ao} aoDrawStep
+         * @param  {integer} iNbIteration
          * @return {void}
          */
 
-        var clearCanvas = function(elCanvas)
+        var drawNbIteration = function(elCanvas, aoDrawStep, iNbIteration)
         {
-          var ctx = elCanvas.get(0).getContext('2d');
-          ctx.clearRect(0, 0, elCanvas.get(0).width, elCanvas.get(0).height);
-        };
+          var iStep = 0;
+          var oStep, oStepService;
 
-        /**
-         * Draw the path on the canvas
-         * @param  {Object} event - mouse event
-         * @return {void}
-         */
-
-        var drawPath = function(elCanvas, oPath, iMaxPos)
-        {
-          var ctx = elCanvas.get(0).getContext('2d');
-
-          ctx.strokeStyle = oPath.sColor;
-          ctx.lineWidth = oPath.iStroke;
-          ctx.lineCap = 'round';
-
-          var oStartPos = oPath.aoPos[0];
-          ctx.beginPath();
-          ctx.moveTo(oStartPos.x - 0.01, oStartPos.y - 0.01);
-
-          for (var iPos = 1, iLength = iMaxPos || oPath.aoPos.length; iPos < iLength; iPos++) {
-            ctx.lineTo(oPath.aoPos[iPos].x, oPath.aoPos[iPos].y);
-          }
-
-          ctx.stroke();
-          ctx.closePath();
-        };
-
-        /**
-         * Begin the path
-         * @param  {Object} event - mouse event
-         * @return {void}
-         */
-
-        var beginPath = function(event)
-        {
-          scope.aoPath.splice(scope.iNbPos);
-          scope.bDown = true;
-          scope.oPath = {
-            'aoPos' : [],
-            'fAnimPercent' : 1,
-            'sColor' : scope.sGetRgba(),
-            'iStroke' : scope.iStroke
-          };
-          scope.aoPath.push(scope.oPath);
-          addPos(event);
-        };
-
-        /**
-         * End the path
-         * @param  {Object} event - mouse event
-         * @return {void}
-         */
-
-        var endPath = function(event)
-        {
-          if (scope.bDown) {
-            addPos(event);
-
-            clearCanvas(elFront);
-            drawPath(elBack, scope.oPath);
-
-            scope.iNbPos = scope.aoPath.length;
-
-            scope.bDown = false;
-          }
-        };
-
-        /**
-         * Add the mouse position to the path
-         * @param  {Object} event - mouse event
-         * @return {void}
-         */
-
-        var addPos = function(event)
-        {
-          scope.oPath.aoPos.push({
-            'x' : event.offsetX,
-            'y' : event.offsetY
-          });
-
-          clearCanvas(elFront);
-          drawPath(elFront, scope.oPath);
-        };
-
-        /**
-         * Event listeners
-         */
-        scope.onMouseDown = function(event)
-        {
-          beginPath(event);
-        };
-
-        scope.onMouseUp = function($event)
-        {
-          if (scope.bDown) {
-            endPath($event);
-          }
-        };
-
-        scope.onMouseEnter = function($event)
-        {
-          if ($event.which) {
-            beginPath($event);
-          }
-        };
-
-        scope.onMouseMove = function($event)
-        {
-          if (scope.bDown) {
-            addPos($event);
+          while(iNbIteration > 0) {
+            oStep = aoDrawStep[iStep];
+            oStepService = asoService[Draw.aisTYPE[oStep.iType]];
+            var iNbStepIteration = oStepService.iGetNbStepIteration(oStep);
+            
+            if (iNbIteration >= iNbStepIteration) {
+              oStep.fAnimPercent = 1;
+              oStepService.draw(elCanvas, oStep);
+              iNbIteration -= iNbStepIteration;
+              iStep++;
+            }
+            else {
+              oStep.fAnimPercent = iNbIteration / iNbStepIteration;
+              oStepService.draw(elCanvas, oStep, iNbIteration);
+              iNbIteration = 0;
+            }
           }
         };
 
@@ -165,57 +83,84 @@ angular.module('drawMeAMamutApp')
             onResize();
         });
 
+        // Mouse Event Listener
+        scope.onMouseDown = function($event)
+        {
+          oService.onMouseDown($event, scope, elFront, elBack);
+        };
+
+        scope.onMouseUp = function($event)
+        {
+          oService.onMouseUp($event, scope, elFront, elBack);
+        };
+
+        scope.onMouseEnter = function($event)
+        {
+          oService.onMouseEnter($event, scope, elFront, elBack);
+        };
+
+        scope.onMouseLeave = function($event)
+        {
+          oService.onMouseLeave($event, scope, elFront, elBack);
+        };
+
+        scope.onMouseMove = function($event)
+        {
+          oService.onMouseMove($event, scope, elFront, elBack);
+        };
+
         $rootScope.$on('draw-clear', function()
         {
-          scope.aoPath = [];
-          clearCanvas(elBack);
+          scope.aoDrawStep = [];
+          Draw.clearCanvas(elBack);
         });
 
-        $rootScope.$on('draw-to-path', function(event, iToPath)
+        $rootScope.$on('draw-to-step', function(event, iToDrawStep)
         {
-          clearCanvas(elBack);
+          Draw.clearCanvas(elBack);
 
-          var iPath = 0;
-          for (var iLength = scope.aoPath.length; iPath < iLength; iPath++) {
-            scope.aoPath[iPath].fAnimPercent = 0;
+          var iDrawStep = 0;
+          var oStep, oStepService;
+          for (var iLength = scope.aoDrawStep.length; iDrawStep < iLength; iDrawStep++) {
+            oStep = scope.aoDrawStep[iDrawStep];
+            oStep.fAnimPercent = 0;
           }
 
-          iPath = 0;
-          for (var iPath; iPath < iToPath + 1; iPath ++) {
-            scope.aoPath[iPath].fAnimPercent = 1;
-            drawPath(elBack, scope.aoPath[iPath]);
+          iDrawStep = 0;
+          for (var iDrawStep; iDrawStep < iToDrawStep + 1; iDrawStep ++) {
+            oStep = scope.aoDrawStep[iDrawStep];
+            oStep.fAnimPercent = 1;
+            oStepService = asoService[Draw.aisTYPE[oStep.iType]];
+            oStepService.draw(elBack, scope.aoDrawStep[iDrawStep]);
           }
           
-          scope.iNbPos = iToPath + 1;
+          scope.iNbStep = iToDrawStep + 1;
         });
 
         $rootScope.$on('draw-repeat', function()
         {
-          clearCanvas(elBack);
+          Draw.clearCanvas(elBack);
 
-          var iTotalPos = 0;
-          var iPath = 0;
-          for (var iLength = scope.aoPath.length; iPath < iLength; iPath++) {
-            scope.aoPath[iPath].fAnimPercent = 0;
-            iTotalPos += scope.aoPath[iPath].aoPos.length;
+          var iTotalIteration = 0;
+          var iDrawStep = 0;
+          var oStep, oStepService;
+          for (var iLength = scope.aoDrawStep.length; iDrawStep < iLength; iDrawStep++) {
+            oStep = scope.aoDrawStep[iDrawStep];
+            oStep.fAnimPercent = 0;
+            oStepService = asoService[Draw.aisTYPE[oStep.iType]];
+            iTotalIteration += oStepService.iGetNbStepIteration(oStep);
           }
 
-          var iStep = Math.ceil(iTotalPos / 300);
+          var iIteration = Math.ceil(iTotalIteration / 300);
 
-          var iMaxPos = 1;
-          iPath = 0;
+          var iMaxIteration = 1;
           var iterate = function() {
-            if (scope.aoPath[iPath] !== undefined) {
-              drawPath(elBack, scope.aoPath[iPath], iMaxPos);
-              var iNbPos = scope.aoPath[iPath].aoPos.length;
-              scope.aoPath[iPath].fAnimPercent = iMaxPos / (iNbPos - 1);
-              if (iMaxPos >= iNbPos - 1) {
-                iPath++;
-                iMaxPos = 1;
-              }
-              else {
-                iMaxPos = Math.min(iMaxPos + iStep, scope.aoPath[iPath].aoPos.length - 1);
-              }
+            if (iMaxIteration < iTotalIteration) {
+              iMaxIteration = Math.min(iMaxIteration + iIteration, iTotalIteration);
+              
+              Draw.clearCanvas(elBack);
+              drawNbIteration(elBack, scope.aoDrawStep, iMaxIteration);
+
               setTimeout(iterate, 10);
               scope.$apply();
             }

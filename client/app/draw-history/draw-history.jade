@@ -3,11 +3,11 @@ button(class="btn draw-history-clear", ng-click="onClear()")
 button(class="btn draw-history-repeat", ng-click="onRepeat()")
   span(class="glyphicon glyphicon-repeat")
 .draw-history
-  draw-history-path(
-    ng-repeat='oPath in aoPath|reverse'
-    ng-click="onDrawToPath($event)"
-    data-path="{{aoPath.length - $index - 1}}"
+  draw-history-step(
+    ng-repeat='oDrawStep in aoDrawStep|reverse'
+    ng-click="onDrawToStep($event)"
+    data-step="{{aoDrawStep.length - $index - 1}}"
   )
     .draw-history-color(
-      ng-style="getPathPercent(oPath)"
-    ) {{oPath.iStroke}}
+      ng-style="getPathPercent(oDrawStep)"
+    ) {{oDrawStep.iStroke}}

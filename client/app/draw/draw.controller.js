@@ -12,7 +12,8 @@ angular.module('drawMeAMamutApp')
         } : null;
     }
 
-    $scope.aoPath = [];
+    $scope.sAction = 'path';
+    $scope.aoDrawStep = [];
     $scope.bDown = false;
     $scope.fOpacity = 1;
     $scope.iStroke = 4;

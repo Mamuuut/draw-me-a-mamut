@@ -11,9 +11,9 @@ angular.module('drawMeAMamutApp')
           $rootScope.$broadcast('draw-repeat');
         };
 
-        scope.onDrawToPath = function($event) {
-          var iPath = $($event.currentTarget).data('path');
-          $rootScope.$broadcast('draw-to-path', iPath);
+        scope.onDrawToStep = function($event) {
+          var iStep = $($event.currentTarget).data('step');
+          $rootScope.$broadcast('draw-to-step', iStep);
         };
 
         scope.onClear = function() {
@@ -22,19 +22,19 @@ angular.module('drawMeAMamutApp')
       }
     };
   })
-  .directive('drawHistoryPath', function () {
+  .directive('drawHistoryStep', function () {
     return {
       restrict: 'E',
       link: function (scope, element, attrs) {
-        scope.getPathPercent = function(oPath) {
+        scope.getStepPercent = function(oDrawStep) {
           return {
-            'top' : (1 - oPath.fAnimPercent) * 100 + '%'
+            'top' : (1 - oDrawStep.fAnimPercent) * 100 + '%'
           }
         }
 
         element.find('.draw-history-color').css({
-          'background-color': scope.oPath.sColor,
-          'color': tinycolor(scope.oPath.sColor).isDark() ? '#ffffff' : '#000000'
+          'background-color': scope.oDrawStep.sColor,
+          'color': tinycolor(scope.oDrawStep.sColor).isDark() ? '#ffffff' : '#000000'
         });
       }
     };

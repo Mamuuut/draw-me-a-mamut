@@ -15,12 +15,28 @@
     padding: 0.2em 0;
 }
 
+.svg-sprite {
+    display: none;
+}
+
+.svg-icon {
+    width : 30px;
+    height : 30px;
+    margin: -1px;
+
+    svg {
+        width: 100%;
+        height: 100%;
+    }
+}
+
 .dropdown-menu {
   background: #eee;
 }
 
 // injector
 @import 'account/login/login.less';
+@import 'action-picker/action-picker.less';
 @import 'admin/admin.less';
 @import 'color-picker/color-picker.less';
 @import 'draw-history/draw-history.less';

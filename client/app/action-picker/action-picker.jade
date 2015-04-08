@@ -1,0 +1,20 @@
+div(
+  class="action-picker"
+  dropdown
+  is-open="status.isopen")
+    button(
+      class="action btn dropdown-toggle"
+      type="button"
+    )
+      div.svg-icon
+        svg-icon(sprite="{{sAction}}")
+
+    .dropdown-menu
+      .action(
+        ng-repeat='sDropdownAction in asAction'
+        ng-class="{'selected':sDropdownAction === sAction}",
+        data-action="{{sDropdownAction}}"
+        ng-click="onClick($event)"
+      )
+        div.svg-icon
+          svg-icon(sprite="{{sDropdownAction}}")

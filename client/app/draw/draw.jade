@@ -1,7 +1,9 @@
 div(ng-include='"components/navbar/navbar.html"')
 
 .container
+
   div.draw-header.clearfix
+    action-picker(action="sAction")
     color-picker(color="sDrawColor")
     stroke-picker(stroke="iStroke")
     opacity-picker(opacity="fOpacity")
