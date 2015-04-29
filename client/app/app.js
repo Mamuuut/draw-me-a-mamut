@@ -58,5 +58,3 @@ angular.module('drawMeAMamutApp', [
       });
     });
   });
-  
-  // 771933831
